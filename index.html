@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Edit Nomor Database</title>
+  <style>
+    body { font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; }
+    input, button { padding: 8px; margin: 5px 0; width: 100%; }
+    ul { list-style: none; padding: 0; }
+    li { display: flex; justify-content: space-between; margin-bottom: 5px; }
+  </style>
+</head>
+<body>
+  <h1>🔥ADD NOMOR SIMPLE BOT V18🔥</h1>
+
+  <input type="text" id="newNumber" placeholder="Masukkan nomor baru (mis: 628123456789)" />
+  <button onclick="addNumber()">Tambah Nomor</button>
+
+  <h3>Daftar Nomor:</h3>
+  <ul id="numberList"></ul>
+
+  <h3>GitHub Settings</h3>
+  <input type="text" id="token" placeholder="GitHub Personal Access Token" />
+  <input type="text" id="owner" placeholder="GitHub Owner (mis: Edo-bo)" />
+  <input type="text" id="repo" placeholder="Nama Repo (mis: database)" />
+  <input type="text" id="path" placeholder="Path File (mis: database.json)" />
+  <button onclick="commitChanges()">Simpan ke GitHub</button>
+
+  <script>
+    let database = [];
+    const rawUrl = 'https://raw.githubusercontent.com/Edo-bo/database/main/database.json';
+
+    async function fetchDatabase() {
+      const res = await fetch(rawUrl);
+      database = await res.json();
+      renderList();
+    }
+
+    function renderList() {
+      const list = document.getElementById('numberList');
+      list.innerHTML = '';
+      database.forEach((number, index) => {
+        const li = document.createElement('li');
+        li.innerHTML = `${number} <button onclick="removeNumber(${index})">Hapus</button>`;
+        list.appendChild(li);
+      });
+    }
+
+    function addNumber() {
+      const input = document.getElementById('newNumber');
+      const value = input.value.trim();
+      if (value && !database.includes(value)) {
+        database.push(value);
+        renderList();
+        input.value = '';
+        alert('Nomor ditambahkan secara lokal. Klik "Simpan ke Database" untuk commit.');
+      }
+    }
+
+    function removeNumber(index) {
+      if (confirm('Yakin ingin menghapus nomor ini?')) {
+        database.splice(index, 1);
+        renderList();
+        alert('Nomor dihapus secara lokal. Klik "Simpan ke Database" untuk commit.');
+      }
+    }
+
+    async function commitChanges() {
+      const token = document.getElementById('token').value.trim();
+      const owner = document.getElementById('owner').value.trim();
+      const repo = document.getElementById('repo').value.trim();
+      const path = document.getElementById('path').value.trim();
+
+      const getUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
+      const getRes = await fetch(getUrl, {
+        headers: { Authorization: `token ${token}` }
+      });
+      const fileData = await getRes.json();
+
+      const content = btoa(JSON.stringify(database, null, 2));
+
+      const res = await fetch(getUrl, {
+        method: 'PUT',
+        headers: {
+          Authorization: `token ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          message: 'Update database.json via owner',
+          content: content,
+          sha: fileData.sha
+        })
+      });
+
+      if (res.ok) {
+        alert('Perubahan berhasil dikirim ke Database!');
+      } else {
+        const error = await res.json();
+        alert('Gagal menyimpan: ' + (error.message || 'Unknown error'));
+      }
+    }
+
+    fetchDatabase();
+  </script>
+</body>
+</html>
