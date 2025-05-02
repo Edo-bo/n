@@ -1,8 +1,9 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-  <title>DATABASE BY OWNER</title>
+  <title>DATABASE BY OWNER - LOGIN SUKSES</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
   <link href="https://fonts.googleapis.com/css2?family=Inter&display=swap" rel="stylesheet" />
@@ -18,11 +19,20 @@
       margin: 0;
       padding: 0;
     }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: -1;
+    }
+
     #numberList::-webkit-scrollbar {
       width: 8px;
     }
     #numberList::-webkit-scrollbar-thumb {
-      background-color: #818cf8; /* indigo-400 */
+      background-color: #818cf8;
       border-radius: 4px;
     }
     #numberList::-webkit-scrollbar-track {
@@ -31,15 +41,12 @@
   </style>
 </head>
 <body class="min-h-screen flex items-center justify-center p-4 sm:p-8">
-  <main class="bg-white/90 shadow-2xl rounded-3xl max-w-3xl w-full p-6 sm:p-10 backdrop-blur-md border border-indigo-300">
-    <h1 class="text-3xl sm:text-4xl font-extrabold text-indigo-700 text-center mb-10 select-none leading-tight">
+  <main class="container mx-auto bg-white/90 shadow-2xl rounded-3xl max-w-3xl w-full p-4 sm:p-8 backdrop-blur-md border border-indigo-300">
+    <h1 class="text-3xl sm:text-4xl font-extrabold text-indigo-700 text-center mb-6 select-none leading-tight">
       🔥 SIMPLE BOT V18 NEW🔥
     </h1>
-    <h1 class="text-3xl sm:text-4xl font-extrabold text-indigo-700 text-center mb-10 select-none leading-tight">
-       ADD AKSES DI SINI 
-    </h1>
 
-    <div class="flex flex-col sm:flex-row gap-4 mb-8">
+    <div class="flex flex-col sm:flex-row sm:flex-wrap gap-4 mb-8">
       <input
         type="text"
         id="newNumber"
@@ -48,7 +55,7 @@
         pattern="[0-9]+"
         autocomplete="off"
         aria-label="Masukkan nomor baru"
-        class="flex-grow px-5 py-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-400 text-lg sm:text-xl shadow-sm transition"
+        class="flex-grow min-w-0 px-5 py-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-400 text-lg sm:text-xl shadow-sm transition"
       />
       <button
         type="button"
@@ -62,15 +69,14 @@
 
     <section class="mb-10">
       <h2 class="text-xl sm:text-2xl font-semibold text-gray-900 mb-4 border-b-2 border-indigo-400 pb-2">
-        Daftar Nomor 
+        Daftar Nomor
       </h2>
       <ul
         id="numberList"
         class="max-h-72 sm:max-h-96 overflow-y-auto border border-gray-300 rounded-xl divide-y divide-gray-300 bg-indigo-50 shadow-inner"
         aria-live="polite"
         aria-relevant="additions removals"
-      >
-      </ul>
+      ></ul>
     </section>
 
     <section>
@@ -78,44 +84,16 @@
         Pengaturan Database
       </h2>
       <form onsubmit="event.preventDefault()" class="space-y-6">
-        <input
-          type="text"
-          id="token"
-          placeholder="GitHub Personal Access Token"
-          autocomplete="off"
-          aria-label="GitHub Personal Access Token"
-          class="w-full px-5 py-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-green-400 text-lg sm:text-xl shadow-sm transition"
-        />
-        <input
-          type="text"
-          id="owner"
-          placeholder="GitHub Owner (mis: Edo-bo)"
-          autocomplete="off"
-          aria-label="GitHub Owner"
-          class="w-full px-5 py-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-green-400 text-lg sm:text-xl shadow-sm transition"
-        />
-        <input
-          type="text"
-          id="repo"
-          placeholder="Nama Repo (mis: database)"
-          autocomplete="off"
-          aria-label="Nama Repo"
-          class="w-full px-5 py-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-green-400 text-lg sm:text-xl shadow-sm transition"
-        />
-        <input
-          type="text"
-          id="path"
-          placeholder="Path File (mis: database.json)"
-          autocomplete="off"
-          aria-label="Path File"
-          class="w-full px-5 py-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-green-400 text-lg sm:text-xl shadow-sm transition"
-        />
-        <button
-          type="button"
-          onclick="commitChanges()"
-          class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-4 rounded-xl transition-colors duration-300 flex items-center justify-center text-lg sm:text-xl shadow-lg shadow-green-500/50"
-          aria-label="Simpan ke GitHub"
-        >
+        <input type="text" id="token" placeholder="GitHub Personal Access Token" autocomplete="off"
+          class="w-full px-5 py-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-green-400 text-lg sm:text-xl shadow-sm transition" />
+        <input type="text" id="owner" placeholder="GitHub Owner (mis: Edo-bo)" autocomplete="off"
+          class="w-full px-5 py-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-green-400 text-lg sm:text-xl shadow-sm transition" />
+        <input type="text" id="repo" placeholder="Nama Repo (mis: database)" autocomplete="off"
+          class="w-full px-5 py-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-green-400 text-lg sm:text-xl shadow-sm transition" />
+        <input type="text" id="path" placeholder="Path File (mis: database.json)" autocomplete="off"
+          class="w-full px-5 py-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-green-400 text-lg sm:text-xl shadow-sm transition" />
+        <button type="button" onclick="commitChanges()"
+          class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-4 rounded-xl transition-colors duration-300 flex items-center justify-center text-lg sm:text-xl shadow-lg shadow-green-500/50">
           <i class="fas fa-save mr-3"></i> Simpan ke Database
         </button>
       </form>
@@ -173,18 +151,10 @@
     function addNumber() {
       const input = document.getElementById('newNumber');
       const value = input.value.trim();
-      if (!value) {
-        alert('Masukkan nomor terlebih dahulu.');
-        return;
-      }
-      if (!/^\d+$/.test(value)) {
-        alert('Nomor hanya boleh berisi angka.');
-        return;
-      }
-      if (database.includes(value)) {
-        alert('Nomor sudah ada di database.');
-        return;
-      }
+      if (!value) return alert('Masukkan nomor terlebih dahulu.');
+      if (!/^\d+$/.test(value)) return alert('Nomor hanya boleh berisi angka.');
+      if (database.includes(value)) return alert('Nomor sudah ada di database.');
+
       database.push(value);
       renderList();
       input.value = '';
@@ -205,10 +175,7 @@
       const repo = document.getElementById('repo').value.trim();
       const path = document.getElementById('path').value.trim();
 
-      if (!token || !owner || !repo || !path) {
-        alert('Semua pengaturan GitHub harus diisi.');
-        return;
-      }
+      if (!token || !owner || !repo || !path) return alert('Semua pengaturan GitHub harus diisi.');
 
       const getUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
 
@@ -216,10 +183,7 @@
         const getRes = await fetch(getUrl, {
           headers: { Authorization: `token ${token}` }
         });
-        if (!getRes.ok) {
-          const err = await getRes.json();
-          throw new Error(err.message || 'Gagal mengambil file dari database.json');
-        }
+        if (!getRes.ok) throw new Error((await getRes.json()).message || 'Gagal mengambil file dari database.json');
         const fileData = await getRes.json();
 
         const content = btoa(unescape(encodeURIComponent(JSON.stringify(database, null, 2))));
@@ -232,7 +196,7 @@
           },
           body: JSON.stringify({
             message: 'Update database.json via owner',
-            content: content,
+            content,
             sha: fileData.sha
           })
         });
