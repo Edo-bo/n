@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>DATABASE SIMPLE BOT V18</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+</head>
+<body class="min-h-screen bg-black bg-cover bg-center bg-no-repeat p-6" style="background-image: url('https://storage.googleapis.com/a1aa/image/51269bfa-4829-45ff-0c20-0e124a5395f8.jpg')">
+  <main class="max-w-3xl mx-auto bg-white/90 rounded-3xl shadow-2xl p-6 space-y-8 text-gray-900 backdrop-blur-lg">
+    <h1 class="text-3xl font-extrabold text-indigo-700 text-center">🔥 SIMPLE BOT V18 🔥</h1>
+
+    <div class="flex flex-col sm:flex-row gap-4">
+      <input id="searchInput" type="text" placeholder="Cari nomor..." class="flex-grow px-4 py-3 rounded-xl border border-gray-300 text-lg focus:ring-4 focus:ring-indigo-400" oninput="renderList()" />
+      <input id="newNumber" type="text" placeholder="Tambah nomor baru" class="flex-grow px-4 py-3 rounded-xl border border-gray-300 text-lg focus:ring-4 focus:ring-green-400" />
+      <button onclick="addNumber()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl px-6 py-3 shadow-md"><i class="fas fa-plus mr-2"></i>Tambah</button>
+    </div>
+
+    <ul id="numberList" class="divide-y divide-gray-300 rounded-xl bg-indigo-50 border border-gray-300 max-h-96 overflow-y-auto shadow-inner"></ul>
+
+    <div class="space-y-4">
+      <input id="token" placeholder="GitHub Token" class="w-full px-4 py-3 rounded-xl border border-gray-300 text-lg focus:ring-4 focus:ring-green-400" />
+      <input id="owner" placeholder="GitHub Owner (mis: Edo-bo)" class="w-full px-4 py-3 rounded-xl border border-gray-300 text-lg focus:ring-4 focus:ring-green-400" />
+      <input id="repo" placeholder="Nama Repo (mis: database-1)" class="w-full px-4 py-3 rounded-xl border border-gray-300 text-lg focus:ring-4 focus:ring-green-400" />
+      <input id="path" placeholder="Path File (mis: database.json)" class="w-full px-4 py-3 rounded-xl border border-gray-300 text-lg focus:ring-4 focus:ring-green-400" />
+      <button onclick="commitChanges()" class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-4 rounded-xl shadow-md"><i class="fas fa-save mr-2"></i>Simpan ke Database</button>
+    </div>
+  </main>
+
+  <script>
+    let database = [];
+    const rawUrl = 'https://raw.githubusercontent.com/Edo-bo/database/main/database.json';
+
+    async function fetchDatabase() {
+      try {
+        const res = await fetch(rawUrl);
+        if (!res.ok) throw new Error('Gagal fetch database');
+        database = await res.json();
+        renderList();
+      } catch (e) {
+        alert('Gagal memuat database, daftar kosong.');
+        database = [];
+        renderList();
+      }
+    }
+
+    function renderList() {
+      const list = document.getElementById('numberList');
+      const keyword = document.getElementById('searchInput').value.trim().toLowerCase();
+      list.innerHTML = '';
+      const filtered = database.filter(item => item.nomor.includes(keyword));
+      if (filtered.length === 0) {
+        const empty = document.createElement('li');
+        empty.className = 'text-center text-gray-500 py-6 italic';
+        empty.textContent = 'Tidak ada nomor ditemukan.';
+        list.appendChild(empty);
+        return;
+      }
+
+      filtered.forEach((item, i) => {
+        const li = document.createElement('li');
+        li.className = 'flex items-center justify-between px-4 py-3';
+
+        const nomorSpan = document.createElement('span');
+        nomorSpan.className = 'font-semibold text-lg';
+        nomorSpan.textContent = item.nomor;
+
+        const statusBtn = document.createElement('button');
+        statusBtn.className = `flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold ${
+          item.status === 'nonaktif' ? 'bg-red-600 text-white hover:bg-red-700' : 'bg-green-600 text-white hover:bg-green-700'
+        }`;
+        statusBtn.innerHTML = item.status === 'nonaktif' 
+          ? '<i class="fas fa-times-circle"></i> Nonaktif' 
+          : '<i class="fas fa-check-circle"></i> Aktif';
+        statusBtn.onclick = () => toggleStatus(item.nomor);
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.innerHTML = '<i class="fas fa-trash-alt"></i>';
+        deleteBtn.className = 'text-red-600 hover:text-red-800 ml-4';
+        deleteBtn.onclick = () => deleteNumber(item.nomor);
+
+        const rightSide = document.createElement('div');
+        rightSide.className = 'flex items-center';
+        rightSide.appendChild(statusBtn);
+        rightSide.appendChild(deleteBtn);
+
+        li.appendChild(nomorSpan);
+        li.appendChild(rightSide);
+        list.appendChild(li);
+      });
+    }
+
+    function addNumber() {
+      const input = document.getElementById('newNumber');
+      const nomor = input.value.trim();
+      if (!nomor) return alert('Nomor kosong!');
+      if (!/^\d+$/.test(nomor)) return alert('Nomor harus angka!');
+      if (database.find(n => n.nomor === nomor)) return alert('Nomor sudah ada!');
+      database.push({ nomor, status: 'aktif' });
+      input.value = '';
+      renderList();
+      alert('Nomor ditambahkan. Klik Simpan untuk update GitHub.');
+    }
+
+    function deleteNumber(nomor) {
+      if (!confirm('Hapus nomor ini?')) return;
+      database = database.filter(n => n.nomor !== nomor);
+      renderList();
+      alert('Nomor dihapus. Klik Simpan untuk update GitHub.');
+    }
+
+    function toggleStatus(nomor) {
+      database = database.map(n =>
+        n.nomor === nomor ? { ...n, status: n.status === 'aktif' ? 'nonaktif' : 'aktif' } : n
+      );
+      renderList();
+    }
+
+    async function commitChanges() {
+      const token = document.getElementById('token').value.trim();
+      const owner = document.getElementById('owner').value.trim();
+      const repo = document.getElementById('repo').value.trim();
+      const path = document.getElementById('path').value.trim();
+
+      if (!token || !owner || !repo || !path) return alert('Semua field harus diisi!');
+
+      const url = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
+      try {
+        const res = await fetch(url, {
+          headers: { Authorization: `token ${token}` }
+        });
+        if (!res.ok) throw new Error('Gagal ambil SHA lama');
+        const file = await res.json();
+
+        const content = btoa(unescape(encodeURIComponent(JSON.stringify(database, null, 2))));
+        const putRes = await fetch(url, {
+          method: 'PUT',
+          headers: {
+            Authorization: `token ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            message: 'Update database dari web UI',
+            content,
+            sha: file.sha
+          })
+        });
+
+        if (putRes.ok) {
+          alert('Database berhasil disimpan ke GitHub!');
+        } else {
+          const err = await putRes.json();
+          alert('Gagal simpan: ' + (err.message || 'unknown error'));
+        }
+      } catch (err) {
+        alert('Error: ' + err.message);
+      }
+    }
+
+    fetchDatabase();
+  </script>
+</body>
+</html>
