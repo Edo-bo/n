@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Monitor Database Bot</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white font-sans p-6 min-h-screen">
+  <div class="max-w-5xl mx-auto">
+    <h1 class="text-3xl font-bold mb-4">Database Real-time</h1>
+
+    <!-- Statistik -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4 text-center">
+      <div class="bg-gray-800 p-4 rounded">
+        <div class="text-lg font-semibold">Total Nomor</div>
+        <div id="total-nomor" class="text-2xl">0</div>
+      </div>
+      <div class="bg-green-700 p-4 rounded">
+        <div class="text-lg font-semibold">Aktif</div>
+        <div id="total-aktif" class="text-2xl">0</div>
+      </div>
+      <div class="bg-red-700 p-4 rounded">
+        <div class="text-lg font-semibold">Nonaktif</div>
+        <div id="total-nonaktif" class="text-2xl">0</div>
+      </div>
+      <div class="bg-gray-700 p-4 rounded">
+        <div class="text-sm">Real-Time</div>
+        <div id="last-updated" class="text-sm text-gray-300">-</div>
+      </div>
+    </div>
+
+    <!-- Pencarian -->
+    <input id="search" type="text" placeholder="Cari berdasarkan ID atau nomor..."
+      class="w-full p-2 mb-4 rounded bg-gray-800 text-white placeholder-gray-400">
+
+    <!-- Tabel Nomor -->
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-separate border-spacing-y-2">
+        <thead>
+          <tr>
+            <th class="px-4 py-2 bg-gray-700 rounded-tl">ID</th>
+            <th class="px-4 py-2 bg-gray-700">Nomor</th>
+            <th class="px-4 py-2 bg-gray-700 rounded-tr">Status</th>
+          </tr>
+        </thead>
+        <tbody id="table-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    const url = "https://raw.githubusercontent.com/Edo-bo/database/main/database.json";
+    let allData = [];
+
+    async function fetchNomor() {
+      try {
+        const res = await fetch(url + '?t=' + Date.now());
+        const data = await res.json();
+        allData = data;
+        renderTable(data);
+        updateStats(data);
+      } catch (err) {
+        console.error("Gagal memuat data:", err);
+        document.getElementById("table-body").innerHTML = `
+          <tr><td colspan="3" class="text-red-400 px-4 py-2">Gagal memuat data</td></tr>`;
+      }
+    }
+
+    function renderTable(data) {
+      const tbody = document.getElementById("table-body");
+      tbody.innerHTML = "";
+      data.forEach((item, index) => {
+        const isAktif = item.status.toLowerCase() === "aktif";
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td class="px-4 py-2 bg-gray-800 rounded-l">${index + 1}</td>
+          <td class="px-4 py-2 bg-gray-800">${item.nomor}</td>
+          <td class="px-4 py-2 ${isAktif ? 'bg-green-600' : 'bg-red-600'} rounded-r text-center">
+            ${isAktif ? 'Aktif' : 'Nonaktif'}
+          </td>`;
+        tbody.appendChild(row);
+      });
+    }
+
+    function updateStats(data) {
+      const total = data.length;
+      const aktif = data.filter(x => x.status.toLowerCase() === "aktif").length;
+      const nonaktif = total - aktif;
+      document.getElementById("total-nomor").textContent = total;
+      document.getElementById("total-aktif").textContent = aktif;
+      document.getElementById("total-nonaktif").textContent = nonaktif;
+      document.getElementById("last-updated").textContent = new Date().toLocaleString();
+    }
+
+    document.getElementById("search").addEventListener("input", function (e) {
+      const keyword = e.target.value.toLowerCase();
+      const filtered = allData.filter((item, index) =>
+        item.nomor.includes(keyword) || (index + 1).toString().includes(keyword)
+      );
+      renderTable(filtered);
+    });
+
+    fetchNomor();
+    setInterval(fetchNomor, 1000);
+  </script>
+</body>
+</html>
